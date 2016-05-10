@@ -161,9 +161,14 @@
         <com.google.service.api.version>directory_v1-rev28-1.17.0-rc</com.google.service.api.version>
         <com.google.code.findbugs.version>1.3.9</com.google.code.findbugs.version>
         <com.fasterxml.jackson.version>2.1.3</com.fasterxml.jackson.version>
+        <axiom.osgi.version.range>[1.2.11, 2.0.0)</axiom.osgi.version.range>
+        <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
+        <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
+        <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
+        <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
+        <carbon.identity.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.package.import.version.range>
     </properties>
-
-
+    
     <modules>
         <module>components/org.wso2.carbon.identity.provisioning.connector.google</module>
         <module>features/org.wso2.carbon.identity.provisioning.connector.google.server.feature</module>
