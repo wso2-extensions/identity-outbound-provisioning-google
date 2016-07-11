@@ -37,7 +37,6 @@
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.provisioning.connector.google</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
