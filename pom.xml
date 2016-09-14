@@ -24,7 +24,7 @@
         <version>1</version>
     </parent>
 
-    <groupId>org.wso2.carbon.identity</groupId>
+    <groupId>org.wso2.carbon.identity.outbound.provisioning.google</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>identity-outbound-provisioning-google</artifactId>
     <version>5.1.2-SNAPSHOT</version>
@@ -124,9 +124,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.provisioning</artifactId>
-                <version>${identity.framework.version}</version>
+                <version>${carbon.identity.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.api-client</groupId>
@@ -164,7 +164,7 @@
                 <version>${com.fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.outbound.provisioning.google</groupId>
                 <artifactId>org.wso2.carbon.identity.provisioning.connector.google</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -260,7 +260,7 @@
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
 
-        <identity.framework.version>5.2.0</identity.framework.version>
+        <carbon.identity.framework.version>5.5.0-SNAPSHOT</carbon.identity.framework.version>
         <carbon.identity.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.package.import.version.range>
 
         <com.google.client.version>1.17.0-rc</com.google.client.version>
