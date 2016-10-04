@@ -260,7 +260,7 @@
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
 
-        <carbon.identity.framework.version>5.5.0-SNAPSHOT</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.5.0</carbon.identity.framework.version>
         <carbon.identity.package.import.version.range>[5.0.0, 6.0.0)</carbon.identity.package.import.version.range>
 
         <com.google.client.version>1.17.0-rc</com.google.client.version>
