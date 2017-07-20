@@ -204,9 +204,8 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
 
         User createdUser = null;
         try {
-            User newUser;
 
-            newUser = buildGoogleUser(provisioningEntity);
+            User newUser = buildGoogleUser(provisioningEntity);
 
             Directory.Users.Insert request = getDirectoryService().users().insert(newUser);
             createdUser = request.execute();
