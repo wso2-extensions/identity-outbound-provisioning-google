@@ -204,9 +204,8 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
 
         User createdUser = null;
         try {
-            User newUser = new User();
 
-            newUser = buildGoogleUser(provisioningEntity);
+            User newUser = buildGoogleUser(provisioningEntity);
 
             Directory.Users.Insert request = getDirectoryService().users().insert(newUser);
             createdUser = request.execute();
@@ -343,8 +342,6 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         String serviceAccountId = this.configHolder.getValue(serviceAccountEmailKey);
         /** Admin email */
         String serviceAccountUser = this.configHolder.getValue(adminEmailKey);
-        /** Path to the Service Account's Private Key file */
-        String serviceAccountPrivateKeyString = this.configHolder.getValue(privateKeyKey);
         /** Application name */
         String applicationName = this.configHolder.getValue(applicationNameKey);
 
