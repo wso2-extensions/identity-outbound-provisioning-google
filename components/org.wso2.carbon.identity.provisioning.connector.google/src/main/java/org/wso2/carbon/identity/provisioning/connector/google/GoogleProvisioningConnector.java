@@ -72,7 +72,6 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
      */
     public void init(Property[] provisioningProperties) throws IdentityProvisioningException {
         Properties configs = new Properties();
-
         if (provisioningProperties != null && provisioningProperties.length > 0) {
             for (Property property : provisioningProperties) {
 
@@ -85,18 +84,16 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
                         fos.write(decodedBytes);
                     } catch (IOException e) {
                         log.error("Error while generating private key file object", e);
-                    }finally {
+                    } finally {
                         IdentityIOStreamUtils.flushOutputStream(fos);
                         IdentityIOStreamUtils.closeOutputStream(fos);
                     }
                 }
                 configs.put(property.getName(), property.getValue());
 
-                if (IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED.equals(property
-                                                                                          .getName()) && "1".equals(property.getValue())) {
+                if (IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED.equals(property.getName()) && "1".equals
+                        (property.getValue())) {
                     jitProvisioningEnabled = true;
-
-
                 }
             }
         }
@@ -151,8 +148,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         return identifier;
     }
 
-    protected void updateUser(ProvisioningEntity provisioningEntity)
-            throws IdentityProvisioningException {
+    protected void updateUser(ProvisioningEntity provisioningEntity) throws IdentityProvisioningException {
         boolean isDebugEnabled = log.isDebugEnabled();
         if (isDebugEnabled) {
             log.debug("Triggering update operation for Google Provisioning Connector");
@@ -186,23 +182,22 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
             }
         } else {
             throw new IdentityProvisioningException(
-                    "Cannot updating Google user, provisionedIdentifier is invalide.");
+                    "Cannot updating Google user, provisionedIdentifier is invalid.");
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("Ending updatingUser() of " + GoogleProvisioningConnector.class);
+        if (log.isDebugEnabled()) {
+            log.debug("Ending updatingUser() of " + GoogleProvisioningConnector.class);
         }
 
     }
 
-    protected String createUser(ProvisioningEntity provisioningEntity)
-            throws IdentityProvisioningException {
+    protected String createUser(ProvisioningEntity provisioningEntity) throws IdentityProvisioningException {
         boolean isDebugEnabled = log.isDebugEnabled();
         if (isDebugEnabled) {
             log.debug("Triggering create operation for Google Provisioning Connector");
         }
 
-        User createdUser = null;
+        User createdUser;
         try {
 
             User newUser = buildGoogleUser(provisioningEntity);
@@ -211,17 +206,14 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
             createdUser = request.execute();
 
         } catch (IOException e) {
-            throw new IdentityProvisioningException("Error while creating user : "
+            throw new IdentityProvisioningException("Error while creating user: "
                                                     + provisioningEntity.getEntityName(), e);
         }
 
         if (isDebugEnabled) {
-            log.debug("Returning created user's email : " + createdUser.getPrimaryEmail());
+            log.debug("Returning created user's email: " + createdUser.getPrimaryEmail());
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("Ending createUser() of " + GoogleProvisioningConnector.class);
-        }
         return createdUser.getPrimaryEmail();
     }
 
@@ -231,8 +223,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
      * @param provisioningEntity
      * @throws IdentityProvisioningException
      */
-    protected void deleteUser(ProvisioningEntity provisioningEntity)
-            throws IdentityProvisioningException {
+    protected void deleteUser(ProvisioningEntity provisioningEntity) throws IdentityProvisioningException {
         boolean isDebugEnabled = log.isDebugEnabled();
         if (isDebugEnabled) {
             log.debug("Triggering delete operation for Google Provisioning Connector");
@@ -240,23 +231,21 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
 
         ProvisionedIdentifier provisionedIdentifier = provisioningEntity.getIdentifier();
         if (provisionedIdentifier != null && provisionedIdentifier.getIdentifier() != null) {
-            User deletingUser = new User();
-            deletingUser.setPrimaryEmail(provisionedIdentifier.getIdentifier());
 
             Directory.Users.Delete request;
             try {
-                request = getDirectoryService().users().delete(
-                        provisionedIdentifier.getIdentifier());
+                request = getDirectoryService().users().delete(provisionedIdentifier.getIdentifier());
                 request.execute();
 
             } catch (IOException e) {
-                if (((GoogleJsonResponseException) e).getStatusCode() == 404) {
+                if (e instanceof GoogleJsonResponseException && ((GoogleJsonResponseException) e)
+                                                                        .getStatusCode() == 404) {
                     log.warn("Exception while deleting user from google. User may be already deleted from google");
                     if (log.isDebugEnabled()) {
                         log.debug("Exception while deleting user from google. User may be already deleted from google", e);
                     }
                 } else {
-                    throw new IdentityProvisioningException("Error while deleting Google user : "
+                    throw new IdentityProvisioningException("Error while deleting Google user: "
                                                             + provisioningEntity.getEntityName(), e);
                 }
             }
@@ -266,12 +255,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
                           + " with the primaryEmail : " + provisionedIdentifier.getIdentifier());
             }
         } else {
-            throw new IdentityProvisioningException(
-                    "Cannot delete Google user, provisionedIdentifier is invalide.");
-        }
-
-        if (log.isTraceEnabled()) {
-            log.trace("Ending deleteUser() of " + GoogleProvisioningConnector.class);
+            throw new IdentityProvisioningException("Cannot delete Google user, provisionedIdentifier is invalid.");
         }
     }
 
@@ -369,8 +353,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
                     .build();
 
         } catch (GeneralSecurityException | IOException e) {
-            throw new IdentityProvisioningException("Error while obtaining connection from google",
-                                                    e);
+            throw new IdentityProvisioningException("Error while obtaining connection from google", e);
         }
 
         if (log.isDebugEnabled()) {
@@ -410,8 +393,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         String idpName_key = "identityProviderName";
         String userIdClaimUriKey = "userIdClaimUri";
 
-        Map<String, String> requiredAttributes = getSingleValuedClaims(provisioningEntity
-                                                                               .getAttributes());
+        Map<String, String> requiredAttributes = getSingleValuedClaims(provisioningEntity.getAttributes());
 
         /** Provisioning Pattern */
         String provisioningPattern = this.configHolder.getValue(provisioningPatternKey);
@@ -437,10 +419,8 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
 
         String userIdFromPattern = null;
 
-        if (provisioningPattern != null) {
-            userIdFromPattern = buildUserId(provisioningEntity, provisioningPattern,
+        userIdFromPattern = buildUserId(provisioningEntity, provisioningPattern,
                                             provisioningSeparator, idpName);
-        }
 
         if (StringUtils.isNotBlank(userIdFromPattern)) {
             userId = userIdFromPattern;
@@ -494,7 +474,6 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         }
         newUser.setPrimaryEmail(userId);
 
-
         if (log.isDebugEnabled()) {
             try {
                 log.debug("Building Google user : " + newUser.toPrettyString());
@@ -525,8 +504,7 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         String familyNameClaimKey = "google_prov_familyname_claim_dropdown";
         String givenNameClaimKey = "google_prov_givenname_claim_dropdown";
 
-        Map<String, String> requiredAttributes = getSingleValuedClaims(provisioningEntity
-                                                                               .getAttributes());
+        Map<String, String> requiredAttributes = getSingleValuedClaims(provisioningEntity.getAttributes());
 
         if (MapUtils.isEmpty(requiredAttributes)) {
             return null;
