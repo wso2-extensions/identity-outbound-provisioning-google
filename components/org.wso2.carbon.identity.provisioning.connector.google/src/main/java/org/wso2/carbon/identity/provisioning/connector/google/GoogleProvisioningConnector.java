@@ -184,11 +184,6 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
             throw new IdentityProvisioningException(
                     "Cannot updating Google user, provisionedIdentifier is invalid.");
         }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Ending updatingUser() of " + GoogleProvisioningConnector.class);
-        }
-
     }
 
     protected String createUser(ProvisioningEntity provisioningEntity) throws IdentityProvisioningException {
@@ -255,7 +250,8 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
                           + " with the primaryEmail : " + provisionedIdentifier.getIdentifier());
             }
         } else {
-            throw new IdentityProvisioningException("Cannot delete Google user, provisionedIdentifier is invalid.");
+            throw new IdentityProvisioningException("Cannot delete Google user, provisionedIdentifier is null or " +
+                                                    "empty");
         }
     }
 

@@ -59,36 +59,42 @@ public class GoogleProvisioningConnectorConfigTest {
         Properties properties2 = new Properties();
 
         return new Object[][]{
-                {properties1, false},
-                {properties2, true}
+                {properties1, 2},
+                {properties2, 0}
         };
     }
 
     @Test(dataProvider = "requiredFieldsProvider")
-    public void testGetRequiredAttributeNames(Properties properties, boolean isEmpty) throws Exception {
+    public void testGetRequiredAttributeNames(Properties properties, int size) throws Exception {
 
         setLogging(false);
         GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        if (isEmpty) {
-            Assert.assertEquals(connectorConfig.getRequiredAttributeNames().size(), 0);
-        } else {
-            Assert.assertNotEquals(connectorConfig.getRequiredAttributeNames().size(), 0);
-        }
+        Assert.assertEquals(connectorConfig.getRequiredAttributeNames().size(), size);
     }
 
-    @Test(dataProvider = "requiredFieldsProvider")
-    public void testGetValue(Properties properties, boolean isEmpty) throws Exception {
+
+    @DataProvider(name = "getValuesProvider")
+    public Object[][] provideGetValueData() {
+
+        Properties properties1 = new Properties();
+        properties1.setProperty(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS, REQUIRED_FIELDS);
+
+        Properties properties2 = new Properties();
+
+        return new Object[][]{
+                {properties1, REQUIRED_FIELDS},
+                {properties2, null}
+        };
+    }
+    @Test(dataProvider = "getValuesProvider")
+    public void testGetValue(Properties properties, String expectedValue) throws Exception {
 
         setLogging(false);
         GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        if (isEmpty) {
-            Assert.assertNull(connectorConfig.getValue(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS));
-        } else {
-            Assert.assertEquals(connectorConfig.getValue(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS),
-                                REQUIRED_FIELDS);
-        }
+        Assert.assertEquals(connectorConfig.getValue(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS),
+                            expectedValue);
     }
 
     @DataProvider(name = "userIdProvider")
@@ -102,26 +108,20 @@ public class GoogleProvisioningConnectorConfigTest {
 
         return new Object[][]{
                 // CASE_1: USER_ID_CLAIM property is present in connector configs.
-                {properties1, false, CASE_1},
+                {properties1, false, LAST_NAME_CLAIM},
                 // CASE_2: ATTRIBUTE_PRIMARYEMAIL property is present in connector configs.
-                {properties2, true, CASE_2},
+                {properties2, true, EMAIL_NAME_CLAIM},
                 // CASE_3: No external properties in connector configs. Default values are set.
-                {properties3, false, CASE_3},
+                {properties3, false, STREET_ADDRESS_CLAIM},
         };
     }
 
     @Test(dataProvider = "userIdProvider")
-    public void testGetUserIdClaim(Properties properties, boolean debugEnabled, int caseNo) throws Exception {
+    public void testGetUserIdClaim(Properties properties, boolean debugEnabled, String expectedValue) throws Exception {
         setLogging(debugEnabled);
         GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        if (caseNo == CASE_1) {
-            Assert.assertEquals(connectorConfig.getUserIdClaim(), LAST_NAME_CLAIM);
-        } else if (caseNo == CASE_2) {
-            Assert.assertEquals(connectorConfig.getUserIdClaim(), EMAIL_NAME_CLAIM);
-        } else if (caseNo == CASE_3) {
-            Assert.assertEquals(connectorConfig.getUserIdClaim(), STREET_ADDRESS_CLAIM);
-        }
+        Assert.assertEquals(connectorConfig.getUserIdClaim(), expectedValue);
     }
 
     private void setLogging(boolean debugEnabled) {
