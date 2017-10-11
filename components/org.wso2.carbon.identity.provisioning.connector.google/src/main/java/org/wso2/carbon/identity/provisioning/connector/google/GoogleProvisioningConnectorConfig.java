@@ -64,12 +64,6 @@ public class GoogleProvisioningConnectorConfig implements Serializable {
             userIDClaim = "http://wso2.org/claims/streetaddress";
         }
 
-
-        if (StringUtils.isBlank(userIDClaim)) {
-            log.error("UserId cannot mapped to a claim");
-            throw new IdentityProvisioningException("UserId cannot mapped to a claim");
-        }
-
         if (log.isDebugEnabled()) {
             log.debug("Mapped claim for UserId is : " + userIDClaim);
         }

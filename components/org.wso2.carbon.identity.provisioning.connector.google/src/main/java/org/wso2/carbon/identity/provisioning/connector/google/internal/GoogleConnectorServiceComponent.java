@@ -43,9 +43,11 @@ public class GoogleConnectorServiceComponent {
         }
 
         try {
-            GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new GoogleProvisioningConnectorFactory();
+            GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new
+                    GoogleProvisioningConnectorFactory();
 
-            context.getBundleContext().registerService(AbstractProvisioningConnectorFactory.class.getName(), googleProvisioningConnectorFactory, null);
+            context.getBundleContext().registerService(AbstractProvisioningConnectorFactory.class.getName(),
+                                                       googleProvisioningConnectorFactory, null);
             if (log.isDebugEnabled()) {
                 log.debug("Google Identity Provisioning Connector bundle is activated");
             }
