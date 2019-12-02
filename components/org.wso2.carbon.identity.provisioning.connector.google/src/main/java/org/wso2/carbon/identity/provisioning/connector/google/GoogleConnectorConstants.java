@@ -47,6 +47,17 @@ public class GoogleConnectorConstants {
         public static final String DEFAULT_PROVISIONING_PATTERN = "{UN}";
         public static final String DEFAULT_PROVISIONING_SEPERATOR = "_";
 
+        public static final String DOMAIN_NAME_KEY = "google_prov_domain_name";
+        public static final String SERVICE_ACCOUNT_EMAIL_KEY = "google_prov_service_acc_email";
+        public static final String ADMIN_EMAIL_KEY = "google_prov_admin_email";
+        public static final String APPLICATION_NAME_KEY = "google_prov_application_name";
+        public static final String EMAIL_CLAIM_KEY = "google_prov_email_claim_dropdown";
+        public static final String FAMILY_NAME_CLAIM_KEY = "google_prov_familyname_claim_dropdown";
+        public static final String GIVEN_NAME_CLAIM_KEY = "google_prov_givenname_claim_dropdown";
+        public static final String PRIVATE_KEY = "google_prov_private_key";
+        public static final String PROVISIONING_PATTERN_KEY = "google_prov_pattern";
+        public static final String PROVISIONING_SEPERATOR_KEY = "google_prov_separator";
+
         private PropertyConfig(){}
     }
 }
