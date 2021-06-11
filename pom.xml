@@ -121,6 +121,14 @@
 
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>google-api-services</id>
+            <url>http://google-api-client-libraries.appspot.com/mavenrepo</url>
+        </repository>
+    </repositories>
+  
+  
     <build>
         <pluginManagement>
             <plugins>
