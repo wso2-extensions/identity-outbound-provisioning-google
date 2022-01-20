@@ -91,6 +91,21 @@
                 <artifactId>org.wso2.carbon.identity.provisioning.connector.google</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opencensus</groupId>
+                <artifactId>opencensus-api</artifactId>
+                <version>${io.opencensus.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opencensus</groupId>
+                <artifactId>opencensus-contrib-http-util</artifactId>
+                <version>${io.opencensus.contrib.http.util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-context</artifactId>
+                <version>${io.grpc.context.version}</version>
+            </dependency>
 
             <!-- Test Dependencies -->
             <dependency>
@@ -243,6 +258,9 @@
         <com.google.service.api.version>directory_v1-rev28-1.17.0-rc</com.google.service.api.version>
         <com.google.code.findbugs.version>1.3.9</com.google.code.findbugs.version>
         <com.fasterxml.jackson.version>2.9.9</com.fasterxml.jackson.version>
+        <io.opencensus.api.version>0.30.0</io.opencensus.api.version>
+        <io.opencensus.contrib.http.util.version>0.30.0</io.opencensus.contrib.http.util.version>
+        <io.grpc.context.version>1.43.2</io.grpc.context.version>
 
         <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>

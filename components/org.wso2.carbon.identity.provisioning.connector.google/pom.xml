@@ -79,6 +79,18 @@
             <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-contrib-http-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+        </dependency>
 
     </dependencies>
 
@@ -119,7 +131,7 @@
                             version="${identity.outbound.provisioning.google.version}"
                         </Export-Package>
                         <Embed-Dependency>
-                            google-api-client|google-api-services-admin|google-http-client|google-http-client-jackson2|google-oauth-client|jackson-core|jsr305;scope=compile|runtime;inline=false
+                            grpc-context|opencensus-contrib-http-util|opencensus-api|google-api-client|google-api-services-admin|google-http-client|google-http-client-jackson2|google-oauth-client|jackson-core|jsr305;scope=compile|runtime;inline=false
                         </Embed-Dependency>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
