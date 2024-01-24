@@ -534,6 +534,12 @@ public class GoogleProvisioningConnector extends AbstractOutboundProvisioningCon
         }
         username.setFamilyName(familyNameValue);
 
+        /* If both given name and family name values are empty, skip updating user by returning null. Currently,
+        we only update the name of the Google outbound provisioned users & firstname & lastname are required values
+        in Google account */
+        if (StringUtils.isBlank(username.getGivenName()) && StringUtils.isBlank(username.getFamilyName())) {
+            return null;
+        }
         updateUser.setName(username);
         updateUser.setPassword(generatePassword());
 
