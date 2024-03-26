@@ -1,0 +1,12 @@
+{
+    "name": "Google Provisioning Connector",
+    "owner": "WSO2",
+    "category": "Provisioning connector",
+    "documentationUrl": "https://docs.wso2.com/display/IS520/Configuring+Google",
+    "description": "The WSO2 Identity Server has the ability to provision users into Google domains using its identity provisioning framework.",
+    "status": "Active",
+    "labels": [
+        "IS-5.2.0"
+    ],
+    "releases": []
+}
