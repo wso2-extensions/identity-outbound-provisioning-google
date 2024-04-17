@@ -8,5 +8,12 @@
     "labels": [
         "IS-5.2.0"
     ],
-    "releases": []
+    "releases": [
+        {
+            "tagName": "5.1.2",
+            "products": [
+                "IS 5.2.0"
+            ]
+        }
+    ]
 }
