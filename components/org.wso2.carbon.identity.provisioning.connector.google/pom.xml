@@ -129,6 +129,7 @@
                             version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.application.common.model;
                             version="${carbon.identity.package.import.version.range}",
+                            com.fasterxml.jackson.core.*;version="${fasterxml.jackson.core.osgi.version.range}"
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.provisioning.connector.google.internal,
@@ -136,7 +137,7 @@
                             version="${identity.outbound.provisioning.google.version}"
                         </Export-Package>
                         <Embed-Dependency>
-                            grpc-context|opencensus-contrib-http-util|opencensus-api|google-api-client|google-api-services-admin|google-http-client|google-http-client-jackson2|google-oauth-client|jackson-core|jsr305;scope=compile|runtime;inline=false
+                            grpc-context|opencensus-contrib-http-util|opencensus-api|google-api-client|google-api-services-admin|google-http-client|google-http-client-jackson2|google-oauth-client|jsr305;scope=compile|runtime;inline=false
                         </Embed-Dependency>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
