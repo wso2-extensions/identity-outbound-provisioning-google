@@ -22,11 +22,8 @@ import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.model.User;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.reflect.Whitebox;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,7 +39,6 @@ import org.wso2.carbon.identity.provisioning.ProvisioningOperation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -52,16 +48,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@PrepareForTest({LogFactory.class, SecurityUtils.class, User.class, GoogleJsonResponseException.class})
 public class GoogleProvisioningConnectorTest {
 
     private static final int CASE_1 = 1;
@@ -70,44 +65,42 @@ public class GoogleProvisioningConnectorTest {
     private static final int CASE_4 = 4;
     private String username = "testuser";
 
-    @Mock
-    private Log log;
-
     @Test
     public void testInit() throws Exception {
         String privateKey = "googlePrvKey";
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
-        when(log.isDebugEnabled()).thenReturn(true);
-        doNothing().when(log).debug(any());
+        try (MockedStatic<LogFactory> mockedStatic = mockStatic(LogFactory.class)) {
+            Log mockLog = Mockito.mock(Log.class);
+            mockedStatic.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(mockLog);
+            when(mockLog.isDebugEnabled()).thenReturn(true);
+            doNothing().when(mockLog).debug(any());
 
-        GoogleProvisioningConnector connector = new GoogleProvisioningConnector();
+            GoogleProvisioningConnector connector = new GoogleProvisioningConnector();
 
-        Property property1 = new Property();
-        property1.setName(GoogleConnectorConstants.PRIVATE_KEY);
-        property1.setValue(privateKey);
-        Property property2 = new Property();
-        property2.setName(IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED);
-        property2.setValue("1");
-        Property[] provisioningProperties = new Property[]{property1, property2};
+            Property property1 = new Property();
+            property1.setName(GoogleConnectorConstants.PRIVATE_KEY);
+            property1.setValue(privateKey);
+            Property property2 = new Property();
+            property2.setName(IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED);
+            property2.setValue("1");
+            Property[] provisioningProperties = new Property[]{property1, property2};
 
-        connector.init(provisioningProperties);
-        Path filePath = Paths.get(privateKey);
-        boolean fileExist = Files.exists(filePath);
-
-        Assert.assertTrue(fileExist, privateKey + " file is not created.");
-
-        Files.delete(filePath);
+            connector.init(provisioningProperties);
+            Path filePath = Paths.get(privateKey);
+            Assert.assertTrue(java.nio.file.Files.exists(filePath), privateKey + " file is not created.");
+            java.nio.file.Files.deleteIfExists(filePath);
+            Assert.assertFalse(java.nio.file.Files.exists(filePath), privateKey + " file should be cleaned up.");
+        }
     }
 
     @Test
     public void testGetClaimDialectUri() throws Exception {
 
-        setLogging(false);
+        try (MockedStatic<LogFactory> ignore = setLogging(false)) {
 
-        GoogleProvisioningConnector connector = new GoogleProvisioningConnector();
-        Assert.assertNull(connector.getClaimDialectUri());
+            GoogleProvisioningConnector connector = new GoogleProvisioningConnector();
+            Assert.assertNull(connector.getClaimDialectUri());
+        }
     }
 
     @DataProvider(name = "provisionDataProvider")
@@ -141,43 +134,44 @@ public class GoogleProvisioningConnectorTest {
     @Test(dataProvider = "provisionDataProvider")
     public void testProvision(boolean jitProvision, String jitEnable, Object entityObj) throws Exception {
 
-        setLogging(false);
+        try (MockedStatic<LogFactory> ignore = setLogging(false)) {
 
-        Property property1 = new Property();
-        property1.setName(IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED);
-        property1.setValue(jitEnable);
-        Property[] provisioningProperties = new Property[]{property1};
+            Property property1 = new Property();
+            property1.setName(IdentityProvisioningConstants.JIT_PROVISIONING_ENABLED);
+            property1.setValue(jitEnable);
+            Property[] provisioningProperties = new Property[]{property1};
 
-        GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
-        ProvisioningEntity entity = (ProvisioningEntity) entityObj;
-        String provisionedId = "test-provisioned-id";
+            GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
+            ProvisioningEntity entity = (ProvisioningEntity) entityObj;
+            String provisionedId = "test-provisioned-id";
 
-        if (entity != null) {
-            (entity).setJitProvisioning(jitProvision);
+            if (entity != null) {
+                (entity).setJitProvisioning(jitProvision);
 
-            if (ProvisioningOperation.DELETE.equals(entity.getOperation())) {
-                doNothing().when(connector).deleteUser(any(ProvisioningEntity.class));
-            } else if (ProvisioningOperation.POST.equals(entity.getOperation())) {
-                doReturn(provisionedId).when(connector).createUser(any(ProvisioningEntity.class));
-            } else if (ProvisioningOperation.PUT.equals(entity.getOperation())) {
-                doNothing().when(connector).updateUser(any(ProvisioningEntity.class));
+                if (ProvisioningOperation.DELETE.equals(entity.getOperation())) {
+                    doNothing().when(connector).deleteUser(any(ProvisioningEntity.class));
+                } else if (ProvisioningOperation.POST.equals(entity.getOperation())) {
+                    doReturn(provisionedId).when(connector).createUser(any(ProvisioningEntity.class));
+                } else if (ProvisioningOperation.PUT.equals(entity.getOperation())) {
+                    doNothing().when(connector).updateUser(any(ProvisioningEntity.class));
+                }
             }
-        }
 
-        ProvisionedIdentifier identifier = connector.provision(entity);
+            ProvisionedIdentifier identifier = connector.provision(entity);
 
-        if (jitProvision && "0".equals(jitEnable)) {
-            Assert.assertNull(identifier);
-        } else if (entity == null) {
-            Assert.assertNull(identifier);
-        } else if (ProvisioningOperation.PUT.equals(entity.getOperation())) {
-            Assert.assertNull(identifier);
-        } else if (ProvisioningOperation.PATCH.equals(entity.getOperation())) {
-            Assert.assertNull(identifier);
-        } else if (!ProvisioningEntityType.USER.equals(entity.getEntityType())) {
-            Assert.assertNull(identifier);
-        } else {
-            Assert.assertNotNull(identifier);
+            if (jitProvision && "0".equals(jitEnable)) {
+                Assert.assertNull(identifier);
+            } else if (entity == null) {
+                Assert.assertNull(identifier);
+            } else if (ProvisioningOperation.PUT.equals(entity.getOperation())) {
+                Assert.assertNull(identifier);
+            } else if (ProvisioningOperation.PATCH.equals(entity.getOperation())) {
+                Assert.assertNull(identifier);
+            } else if (!ProvisioningEntityType.USER.equals(entity.getEntityType())) {
+                Assert.assertNull(identifier);
+            } else {
+                Assert.assertNotNull(identifier);
+            }
         }
     }
 
@@ -192,36 +186,42 @@ public class GoogleProvisioningConnectorTest {
     @Test(dataProvider = "googleUserDataProvider")
     public void testBuildGoogleUser(boolean debugEnabled) throws Exception {
 
-        setLogging(debugEnabled);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
 
-        String claimUri = "org:wso2:carbon:identity:provisioning:claim:username";
-        String provisioningPatternKey = "google_prov_pattern";
-        String entityName = "usernetityname";
+            String claimUri = "org:wso2:carbon:identity:provisioning:claim:username";
+            String provisioningPatternKey = "google_prov_pattern";
+            String entityName = "usernetityname";
 
-        ClaimMapping claimMapping = new ClaimMapping();
-        Claim claim = new Claim();
-        claim.setClaimUri(claimUri);
-        claimMapping.setLocalClaim(claim);
+            ClaimMapping claimMapping = new ClaimMapping();
+            Claim claim = new Claim();
+            claim.setClaimUri(claimUri);
+            claimMapping.setLocalClaim(claim);
 
-        Map<ClaimMapping, List<String>> attributes = new HashMap<>();
-        attributes.put(claimMapping, Collections.singletonList(username));
+            Map<ClaimMapping, List<String>> attributes = new HashMap<>();
+            attributes.put(claimMapping, Collections.singletonList(username));
 
-        ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST,
-                                                           attributes);
-        entity.setEntityName(entityName);
+            ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST,
+                    attributes);
+            entity.setEntityName(entityName);
 
-        Property property1 = buildProperty(provisioningPatternKey, "{DN}");
-        Property[] provisioningProperties = new Property[]{property1};
-        GoogleProvisioningConnector connector = PowerMockito.spy(getConnector(provisioningProperties));
+            Property property1 = buildProperty(provisioningPatternKey, "{DN}");
+            Property[] provisioningProperties = new Property[]{property1};
+            GoogleProvisioningConnector connector = new GoogleProvisioningConnector() {
+                @Override
+                protected String buildUserId(ProvisioningEntity provisioningEntity, String provisioningPattern,
+                                             String provisioningSeparator, String idpName) {
+                    return ""; // simulate no user id from pattern
+                }
+            };
+            connector.init(provisioningProperties);
 
-        doReturn("").when(connector, "buildUserId", any(ProvisioningEntity.class), anyString(), anyString(),
-                          anyString());
-        User user = connector.buildGoogleUser(entity);
+            User user = connector.buildGoogleUser(entity);
 
-        Assert.assertEquals(user.getPrimaryEmail(), entityName);
-        Assert.assertEquals(user.getName().getGivenName(), username);
-        Assert.assertEquals(user.getName().getFamilyName(), username);
-        Assert.assertNotNull(user.getPassword(), "Password cannot be null.");
+            Assert.assertEquals(user.getPrimaryEmail(), entityName);
+            Assert.assertEquals(user.getName().getGivenName(), username);
+            Assert.assertEquals(user.getName().getFamilyName(), username);
+            Assert.assertNotNull(user.getPassword(), "Password cannot be null.");
+        }
     }
 
     @DataProvider(name = "directoryServiceDataProvider")
@@ -239,23 +239,34 @@ public class GoogleProvisioningConnectorTest {
         String adminEmailKey = "google_prov_admin_email";
         String applicationNameKey = "google_prov_application_name";
 
-        setLogging(debugEnabled);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
 
-        Property property1 = buildProperty(serviceAccountEmailKey, "service@gmail.com");
-        Property property2 = buildProperty(adminEmailKey, "admin@gmail.com");
-        Property property3 = buildProperty(applicationNameKey, "testApp");
-        Property[] provisioningProperties = new Property[]{property1, property2, property3};
+            Property property1 = buildProperty(serviceAccountEmailKey, "service-account@developer.gserviceaccount.com");
+            Property property2 = buildProperty(adminEmailKey, "admin@gmail.com");
+            Property property3 = buildProperty(applicationNameKey, "testApp");
+            Property[] provisioningProperties = new Property[]{property1, property2, property3};
 
-        GoogleProvisioningConnector connector = getConnector(provisioningProperties);
-        Path path = Paths.get("src", "test", "resources", "googlePrvKey");
-        Whitebox.setInternalState(GoogleProvisioningConnector.class, "googlePrvKey", path.toFile());
-        mockStatic(SecurityUtils.class);
-        PrivateKey privateKey = mock(PrivateKey.class);
-        when(SecurityUtils.loadPrivateKeyFromKeyStore(any(KeyStore.class), any(InputStream.class), anyString(),
-                                                         anyString(), anyString())).thenReturn(privateKey);
+            GoogleProvisioningConnector connector = getConnector(provisioningProperties);
+            Path path = Paths.get("src", "test", "resources", "googlePrvKey");
+            // Reflectively set private static googlePrvKey field
+            java.lang.reflect.Field keyField = GoogleProvisioningConnector.class.getDeclaredField("googlePrvKey");
+            keyField.setAccessible(true);
+            keyField.set(null, path.toFile());
 
-        Directory directoryService = connector.getDirectoryService();
-        Assert.assertNotNull(directoryService, "Directory Service cannot be null.");
+            try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+                PrivateKey privateKey = Mockito.mock(PrivateKey.class);
+                KeyStore ks = Mockito.mock(KeyStore.class);
+                // Mock KeyStore retrieval and private key loading via SecurityUtils
+                mocked.when(SecurityUtils::getPkcs12KeyStore).thenReturn(ks);
+                mocked.when(() -> SecurityUtils.loadPrivateKeyFromKeyStore(
+                                Mockito.any(KeyStore.class), Mockito.any(InputStream.class), Mockito.anyString(),
+                                Mockito.anyString(), Mockito.anyString()))
+                        .thenReturn(privateKey);
+
+                Directory directoryService = connector.getDirectoryService();
+                Assert.assertNotNull(directoryService, "Directory Service cannot be null.");
+            }
+        }
     }
 
     @DataProvider(name = "updateGoogleUserDataProvider")
@@ -287,27 +298,28 @@ public class GoogleProvisioningConnectorTest {
         String defaultGivenName = "defaultGivenName";
         String email = "testuser@gmail.com";
         Map<ClaimMapping, List<String>> attributes = (Map<ClaimMapping, List<String>>) attributesObj;
-        setLogging(debugEnabled);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
 
-        ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST,
-                                                           attributes);
-        ProvisionedIdentifier identifier = new ProvisionedIdentifier();
-        identifier.setIdentifier(email);
-        entity.setIdentifier(identifier);
+            ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST,
+                    attributes);
+            ProvisionedIdentifier identifier = new ProvisionedIdentifier();
+            identifier.setIdentifier(email);
+            entity.setIdentifier(identifier);
 
-        Property property1 = buildProperty(defaultFamilyNameKey, defaultFamilyName);
-        Property property2 = buildProperty(defaultGivenNameKey, defaultGivenName);
-        Property[] provisioningProperties = new Property[]{property1, property2};
+            Property property1 = buildProperty(defaultFamilyNameKey, defaultFamilyName);
+            Property property2 = buildProperty(defaultGivenNameKey, defaultGivenName);
+            Property[] provisioningProperties = new Property[]{property1, property2};
 
-        GoogleProvisioningConnector connector = getConnector(provisioningProperties);
-        User user = connector.updateGoogleUser(entity);
+            GoogleProvisioningConnector connector = getConnector(provisioningProperties);
+            User user = connector.updateGoogleUser(entity);
 
-        if (!attributes.isEmpty()) {
-            Assert.assertNotNull(user);
-            Assert.assertEquals(user.getName().getFamilyName(), defaultFamilyName);
-            Assert.assertEquals(user.getName().getGivenName(), defaultGivenName);
-        } else {
-            Assert.assertNull(user);
+            if (!attributes.isEmpty()) {
+                Assert.assertNotNull(user);
+                Assert.assertEquals(user.getName().getFamilyName(), defaultFamilyName);
+                Assert.assertEquals(user.getName().getGivenName(), defaultGivenName);
+            } else {
+                Assert.assertNull(user);
+            }
         }
     }
 
@@ -335,40 +347,41 @@ public class GoogleProvisioningConnectorTest {
     @Test(dataProvider = "updateUserDataProvider")
     public void testUpdateUser(boolean debugEnabled, Object identifierObj, int caseNo) throws Exception {
 
-        setLogging(debugEnabled);
-        ProvisionedIdentifier identifier = (ProvisionedIdentifier) identifierObj;
-        Property[] provisioningProperties = new Property[]{};
-        GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
-        ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
-        entity.setIdentifier(identifier);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
+            ProvisionedIdentifier identifier = (ProvisionedIdentifier) identifierObj;
+            Property[] provisioningProperties = new Property[]{};
+            GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
+            ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
+            entity.setIdentifier(identifier);
 
-        User user = mock(User.class);
-        if (caseNo == CASE_1) {
-            doReturn(null).when(connector).updateGoogleUser(any(ProvisioningEntity.class));
-        } else {
-            doReturn(user).when(connector).updateGoogleUser(any(ProvisioningEntity.class));
-        }
-
-        Directory directory = mock(Directory.class);
-        doReturn(directory).when(connector).getDirectoryService();
-        Directory.Users users = mock(Directory.Users.class);
-        when(directory.users()).thenReturn(users);
-        Directory.Users.Update updateRequest = mock(Directory.Users.Update.class);
-        when(users.update(anyString(), any(User.class))).thenReturn(updateRequest);
-
-        if (caseNo == CASE_4) {
-            when(updateRequest.execute()).thenThrow(new IOException("Test IO Exception."));
-        }
-        try {
-            connector.updateUser(entity);
-            if (caseNo == CASE_2 || caseNo == CASE_4) {
-                Assert.fail("Test expects an IdentityProvisioningException for updateUser().");
-            }
-        } catch (IdentityProvisioningException e) {
-            if (caseNo == CASE_2 || caseNo == CASE_4) {
-                Assert.assertTrue(true, "Test expects an IdentityProvisioningException for updateUser().");
+            User user = mock(User.class);
+            if (caseNo == CASE_1) {
+                doReturn(null).when(connector).updateGoogleUser(any(ProvisioningEntity.class));
             } else {
-                Assert.fail("updateUser() should not throw an error.");
+                doReturn(user).when(connector).updateGoogleUser(any(ProvisioningEntity.class));
+            }
+
+            Directory directory = mock(Directory.class);
+            doReturn(directory).when(connector).getDirectoryService();
+            Directory.Users users = mock(Directory.Users.class);
+            when(directory.users()).thenReturn(users);
+            Directory.Users.Update updateRequest = mock(Directory.Users.Update.class);
+            when(users.update(anyString(), any(User.class))).thenReturn(updateRequest);
+
+            if (caseNo == CASE_4) {
+                when(updateRequest.execute()).thenThrow(new IOException("Test IO Exception."));
+            }
+            try {
+                connector.updateUser(entity);
+                if (caseNo == CASE_2 || caseNo == CASE_4) {
+                    Assert.fail("Test expects an IdentityProvisioningException for updateUser().");
+                }
+            } catch (IdentityProvisioningException e) {
+                if (caseNo == CASE_2 || caseNo == CASE_4) {
+                    Assert.assertTrue(true, "Test expects an IdentityProvisioningException for updateUser().");
+                } else {
+                    Assert.fail("updateUser() should not throw an error.");
+                }
             }
         }
     }
@@ -392,44 +405,46 @@ public class GoogleProvisioningConnectorTest {
     public void testCreateUser(boolean debugEnabled, int caseNo) throws Exception {
         String email = "testuser@gmail.com";
 
-        setLogging(debugEnabled);
-        ProvisionedIdentifier identifier = new ProvisionedIdentifier();
-        Property[] provisioningProperties = new Property[]{};
-        GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
-        ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
-        entity.setEntityName(email);
-        entity.setIdentifier(identifier);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
+            ProvisionedIdentifier identifier = new ProvisionedIdentifier();
+            Property[] provisioningProperties = new Property[]{};
+            GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
+            ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
+            entity.setEntityName(email);
+            entity.setIdentifier(identifier);
+            entity.setEntityName(email);
 
-        User user = mock(User.class);
-        doReturn(user).when(connector).buildGoogleUser(any(ProvisioningEntity.class));
-        Directory directory = mock(Directory.class);
-        doReturn(directory).when(connector).getDirectoryService();
-        Directory.Users users = mock(Directory.Users.class);
-        when(directory.users()).thenReturn(users);
-        Directory.Users.Insert insertRequest = mock(Directory.Users.Insert.class);
-        when(users.insert(any(User.class))).thenReturn(insertRequest);
+            User user = mock(User.class);
+            doReturn(user).when(connector).buildGoogleUser(any(ProvisioningEntity.class));
+            Directory directory = mock(Directory.class);
+            doReturn(directory).when(connector).getDirectoryService();
+            Directory.Users users = mock(Directory.Users.class);
+            when(directory.users()).thenReturn(users);
+            Directory.Users.Insert insertRequest = mock(Directory.Users.Insert.class);
+            when(users.insert(any(User.class))).thenReturn(insertRequest);
 
-        if (caseNo == CASE_1) {
-            when(insertRequest.execute()).thenReturn(user);
-        } else if (caseNo == CASE_2) {
-            when(insertRequest.execute()).thenThrow(new IOException("Test IOException."));
-        }
-        when(user.getPrimaryEmail()).thenReturn(email);
-
-        String createdUser;
-        try {
-            createdUser = connector.createUser(entity);
             if (caseNo == CASE_1) {
-                Assert.assertNotNull(createdUser, "createdUser cannot be null.");
-                Assert.assertEquals(createdUser, email);
+                when(insertRequest.execute()).thenReturn(user);
             } else if (caseNo == CASE_2) {
-                Assert.fail("Test expects an IdentityProvisioningException for createUser().");
+                when(insertRequest.execute()).thenThrow(new IOException("Test IOException."));
             }
-        } catch (IdentityProvisioningException e) {
-            if (caseNo == CASE_2) {
-                Assert.assertTrue(true, "Test expects an IdentityProvisioningException for deleteUser().");
-            } else {
-                Assert.fail("createUser() should not throw an error.");
+            when(user.getPrimaryEmail()).thenReturn(email);
+
+            String createdUser;
+            try {
+                createdUser = connector.createUser(entity);
+                if (caseNo == CASE_1) {
+                    Assert.assertNotNull(createdUser, "createdUser cannot be null.");
+                    Assert.assertEquals(createdUser, email);
+                } else if (caseNo == CASE_2) {
+                    Assert.fail("Test expects an IdentityProvisioningException for createUser().");
+                }
+            } catch (IdentityProvisioningException e) {
+                if (caseNo == CASE_2) {
+                    Assert.assertTrue(true, "Test expects an IdentityProvisioningException for deleteUser().");
+                } else {
+                    Assert.fail("createUser() should not throw an error.");
+                }
             }
         }
     }
@@ -457,39 +472,40 @@ public class GoogleProvisioningConnectorTest {
 
     @Test(dataProvider = "deleteUserDataProvider")
     public void testDeleteUser(boolean debugEnabled, Object identifierObj, int caseNo) throws Exception {
-        setLogging(debugEnabled);
-        ProvisionedIdentifier identifier = (ProvisionedIdentifier) identifierObj;
-        Property[] provisioningProperties = new Property[]{};
-        GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
-        ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
-        entity.setIdentifier(identifier);
+        try (MockedStatic<LogFactory> ignore = setLogging(debugEnabled)) {
+            ProvisionedIdentifier identifier = (ProvisionedIdentifier) identifierObj;
+            Property[] provisioningProperties = new Property[]{};
+            GoogleProvisioningConnector connector = spy(getConnector(provisioningProperties));
+            ProvisioningEntity entity = new ProvisioningEntity(ProvisioningEntityType.USER, ProvisioningOperation.POST);
+            entity.setIdentifier(identifier);
 
-        Directory directory = mock(Directory.class);
-        doReturn(directory).when(connector).getDirectoryService();
-        Directory.Users users = mock(Directory.Users.class);
-        when(directory.users()).thenReturn(users);
-        Directory.Users.Delete updateRequest = mock(Directory.Users.Delete.class);
-        when(users.delete(anyString())).thenReturn(updateRequest);
+            Directory directory = mock(Directory.class);
+            doReturn(directory).when(connector).getDirectoryService();
+            Directory.Users users = mock(Directory.Users.class);
+            when(directory.users()).thenReturn(users);
+            Directory.Users.Delete updateRequest = mock(Directory.Users.Delete.class);
+            when(users.delete(anyString())).thenReturn(updateRequest);
 
-        if (caseNo == CASE_3) {
-            when(updateRequest.execute()).thenThrow(new IOException("Test IO Exception."));
-        } else if (caseNo == CASE_4) {
-            GoogleJsonResponseException exp = mock(GoogleJsonResponseException.class);
-            int errorCode = 404;
-            when(exp.getStatusCode()).thenReturn(errorCode);
-            when(updateRequest.execute()).thenThrow(exp);
-        }
-
-        try {
-            connector.deleteUser(entity);
-            if (caseNo == CASE_2 || caseNo == CASE_3) {
-                Assert.fail("Test expects an IdentityProvisioningException for deleteUser().");
+            if (caseNo == CASE_3) {
+                when(updateRequest.execute()).thenThrow(new IOException("Test IO Exception."));
+            } else if (caseNo == CASE_4) {
+                GoogleJsonResponseException exp = mock(GoogleJsonResponseException.class);
+                int errorCode = 404;
+                when(exp.getStatusCode()).thenReturn(errorCode);
+                when(updateRequest.execute()).thenThrow(exp);
             }
-        } catch (IdentityProvisioningException e) {
-            if (caseNo == CASE_2 || caseNo == CASE_3) {
-                Assert.assertTrue(true, "Test expects an IdentityProvisioningException for deleteUser().");
-            } else {
-                Assert.fail("deleteUser() should not throw an error.");
+
+            try {
+                connector.deleteUser(entity);
+                if (caseNo == CASE_2 || caseNo == CASE_3) {
+                    Assert.fail("Test expects an IdentityProvisioningException for deleteUser().");
+                }
+            } catch (IdentityProvisioningException e) {
+                if (caseNo == CASE_2 || caseNo == CASE_3) {
+                    Assert.assertTrue(true, "Test expects an IdentityProvisioningException for deleteUser().");
+                } else {
+                    Assert.fail("deleteUser() should not throw an error.");
+                }
             }
         }
     }
@@ -509,13 +525,15 @@ public class GoogleProvisioningConnectorTest {
         return property;
     }
 
-    private void setLogging(boolean debugEnabled) {
+    private MockedStatic<LogFactory> setLogging(boolean debugEnabled) {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
+        MockedStatic<LogFactory> logFactoryStatic = mockStatic(LogFactory.class);
+        Log mockLog = Mockito.mock(Log.class);
+        logFactoryStatic.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(mockLog);
 
-        doNothing().when(log).warn(Matchers.any());
-        when(log.isDebugEnabled()).thenReturn(debugEnabled);
-        doNothing().when(log).debug(any());
+        doNothing().when(mockLog).warn(any());
+        when(mockLog.isDebugEnabled()).thenReturn(debugEnabled);
+        doNothing().when(mockLog).debug(any());
+        return logFactoryStatic;
     }
 }

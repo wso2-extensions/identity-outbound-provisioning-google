@@ -21,6 +21,8 @@ package org.wso2.carbon.identity.provisioning.connector.google.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.identity.provisioning.AbstractProvisioningConnectorFactory;
 import org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioningConnectorFactory;
 
@@ -31,15 +33,19 @@ import org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioning
  * "org.wso2.carbon.identity.provisioning.google.internal.GoogleConnectorServiceComponent"
  * immediate="true"
  */
+@Component(
+        name = "org.wso2.carbon.identity.provisioning.google.internal.GoogleConnectorServiceComponent",
+        immediate = true
+)
 public class GoogleConnectorServiceComponent {
 
-    private static Log log = LogFactory
-            .getLog(GoogleConnectorServiceComponent.class);
+    private static final Log LOG = LogFactory.getLog(GoogleConnectorServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext context) {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Activating GoogleConnectorServiceComponent");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Activating GoogleConnectorServiceComponent");
         }
 
         try {
@@ -48,11 +54,11 @@ public class GoogleConnectorServiceComponent {
 
             context.getBundleContext().registerService(AbstractProvisioningConnectorFactory.class.getName(),
                                                        googleProvisioningConnectorFactory, null);
-            if (log.isDebugEnabled()) {
-                log.debug("Google Identity Provisioning Connector bundle is activated");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Google Identity Provisioning Connector bundle is activated");
             }
         } catch (Throwable e) {
-            log.error("Error while activating Google Identity Provisioning Connector", e);
+            LOG.error("Error while activating Google Identity Provisioning Connector", e);
         }
     }
 
