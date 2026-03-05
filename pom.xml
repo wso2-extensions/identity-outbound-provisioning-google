@@ -259,8 +259,8 @@
                 <inherited>true</inherited>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -331,8 +331,8 @@
         <io.grpc.context.version>1.43.2</io.grpc.context.version>
 
         <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
-        <maven.bundle.plugin.version>5.1.2</maven.bundle.plugin.version>
-        <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
+        <maven.bundle.plugin.version>5.1.9</maven.bundle.plugin.version>
+        <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 
@@ -340,7 +340,6 @@
         <!-- Test Dependency Versions -->
         <testng.version>6.3.1</testng.version>
         <powermock.version>1.6.6</powermock.version>
-        <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
     
         <jacoco.version>0.8.12</jacoco.version>
