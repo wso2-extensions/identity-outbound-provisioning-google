@@ -107,6 +107,13 @@
                 <version>${io.grpc.context.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.component.annotations</artifactId>
+                <version>${osgi.annotations.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -115,15 +122,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${powermock.version}</version>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -157,20 +158,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${maven.scr.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
+<plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${maven.bundle.plugin.version}</version>
@@ -330,7 +318,7 @@
         <io.opencensus.contrib.http.util.version>0.30.0</io.opencensus.contrib.http.util.version>
         <io.grpc.context.version>1.43.2</io.grpc.context.version>
 
-        <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
+        <osgi.annotations.version>1.4.0</osgi.annotations.version>
         <maven.bundle.plugin.version>5.1.9</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
@@ -339,7 +327,7 @@
 
         <!-- Test Dependency Versions -->
         <testng.version>6.3.1</testng.version>
-        <powermock.version>1.6.6</powermock.version>
+        <mockito.version>5.3.1</mockito.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
     
         <jacoco.version>0.8.12</jacoco.version>
