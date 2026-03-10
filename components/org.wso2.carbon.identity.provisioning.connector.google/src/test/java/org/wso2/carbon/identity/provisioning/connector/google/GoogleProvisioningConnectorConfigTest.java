@@ -18,19 +18,21 @@ package org.wso2.carbon.identity.provisioning.connector.google;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Properties;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioningConnectorTestConstants
         .EMAIL_NAME_CLAIM;
 import static org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioningConnectorTestConstants
@@ -40,7 +42,6 @@ import static org.wso2.carbon.identity.provisioning.connector.google.GoogleProvi
 import static org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioningConnectorTestConstants
         .STREET_ADDRESS_CLAIM;
 
-@PrepareForTest({LogFactory.class})
 public class GoogleProvisioningConnectorConfigTest {
 
     private static final int CASE_1 = 1;
@@ -49,6 +50,11 @@ public class GoogleProvisioningConnectorConfigTest {
 
     @Mock
     private Log log;
+
+    @BeforeMethod
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @DataProvider(name = "requiredFieldsProvider")
     public Object[][] provideTestData() {
@@ -67,10 +73,12 @@ public class GoogleProvisioningConnectorConfigTest {
     @Test(dataProvider = "requiredFieldsProvider")
     public void testGetRequiredAttributeNames(Properties properties, int size) throws Exception {
 
-        setLogging(false);
-        GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
+        try (MockedStatic<LogFactory> logFactoryMock = mockStatic(LogFactory.class)) {
+            setLogging(logFactoryMock, false);
+            GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        Assert.assertEquals(connectorConfig.getRequiredAttributeNames().size(), size);
+            Assert.assertEquals(connectorConfig.getRequiredAttributeNames().size(), size);
+        }
     }
 
 
@@ -90,11 +98,13 @@ public class GoogleProvisioningConnectorConfigTest {
     @Test(dataProvider = "getValuesProvider")
     public void testGetValue(Properties properties, String expectedValue) throws Exception {
 
-        setLogging(false);
-        GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
+        try (MockedStatic<LogFactory> logFactoryMock = mockStatic(LogFactory.class)) {
+            setLogging(logFactoryMock, false);
+            GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        Assert.assertEquals(connectorConfig.getValue(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS),
-                            expectedValue);
+            Assert.assertEquals(connectorConfig.getValue(GoogleConnectorConstants.PropertyConfig.REQUIRED_FIELDS),
+                                expectedValue);
+        }
     }
 
     @DataProvider(name = "userIdProvider")
@@ -118,18 +128,19 @@ public class GoogleProvisioningConnectorConfigTest {
 
     @Test(dataProvider = "userIdProvider")
     public void testGetUserIdClaim(Properties properties, boolean debugEnabled, String expectedValue) throws Exception {
-        setLogging(debugEnabled);
-        GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
+        try (MockedStatic<LogFactory> logFactoryMock = mockStatic(LogFactory.class)) {
+            setLogging(logFactoryMock, debugEnabled);
+            GoogleProvisioningConnectorConfig connectorConfig = new GoogleProvisioningConnectorConfig(properties);
 
-        Assert.assertEquals(connectorConfig.getUserIdClaim(), expectedValue);
+            Assert.assertEquals(connectorConfig.getUserIdClaim(), expectedValue);
+        }
     }
 
-    private void setLogging(boolean debugEnabled) {
+    private void setLogging(MockedStatic<LogFactory> logFactoryMock, boolean debugEnabled) {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
+        logFactoryMock.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(log);
 
-        doNothing().when(log).warn(Matchers.any());
+        doNothing().when(log).warn(ArgumentMatchers.any());
 
         when(log.isDebugEnabled()).thenReturn(debugEnabled);
         doNothing().when(log).debug(any());

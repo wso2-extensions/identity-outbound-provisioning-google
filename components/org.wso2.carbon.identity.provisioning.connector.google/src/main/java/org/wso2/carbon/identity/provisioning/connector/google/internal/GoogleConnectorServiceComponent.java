@@ -21,21 +21,23 @@ package org.wso2.carbon.identity.provisioning.connector.google.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.identity.provisioning.AbstractProvisioningConnectorFactory;
 import org.wso2.carbon.identity.provisioning.connector.google.GoogleProvisioningConnectorFactory;
 
 //TODO : Add dependency to IdP MetadataService
 
-/**
- * @scr.component name=
- * "org.wso2.carbon.identity.provisioning.google.internal.GoogleConnectorServiceComponent"
- * immediate="true"
- */
+@Component(
+        name = "org.wso2.carbon.identity.provisioning.google.internal.GoogleConnectorServiceComponent",
+        immediate = true
+)
 public class GoogleConnectorServiceComponent {
 
     private static Log log = LogFactory
             .getLog(GoogleConnectorServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext context) {
 
         if (log.isDebugEnabled()) {

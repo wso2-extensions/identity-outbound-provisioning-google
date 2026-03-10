@@ -19,25 +19,31 @@ package org.wso2.carbon.identity.provisioning.connector.google;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.provisioning.AbstractOutboundProvisioningConnector;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
-@PrepareForTest({LogFactory.class})
 public class GoogleProvisioningConnectorFactoryTest {
 
     private static final String CONNECTOR_TYPE = "googleapps";
 
     @Mock
     private Log log;
+
+    @BeforeMethod
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @DataProvider(name = "provideTestData")
     public Object[][] provideTestData() {
@@ -50,28 +56,30 @@ public class GoogleProvisioningConnectorFactoryTest {
     @Test(dataProvider = "provideTestData")
     public void testBuildConnector(boolean debugEnabled) throws Exception {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
-        when(log.isDebugEnabled()).thenReturn(debugEnabled);
-        doNothing().when(log).debug(any());
+        try (MockedStatic<LogFactory> logFactoryMock = mockStatic(LogFactory.class)) {
+            logFactoryMock.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(log);
+            when(log.isDebugEnabled()).thenReturn(debugEnabled);
+            doNothing().when(log).debug(any());
 
-        GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new
-                GoogleProvisioningConnectorFactory();
-        Property[] properties = new Property[0];
-        AbstractOutboundProvisioningConnector connector = googleProvisioningConnectorFactory.buildConnector(properties);
+            GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new
+                    GoogleProvisioningConnectorFactory();
+            Property[] properties = new Property[0];
+            AbstractOutboundProvisioningConnector connector = googleProvisioningConnectorFactory.buildConnector(properties);
 
-        Assert.assertTrue(connector instanceof GoogleProvisioningConnector);
+            Assert.assertTrue(connector instanceof GoogleProvisioningConnector);
+        }
     }
 
     @Test
     public void testGetConnectorType() throws Exception {
 
-        mockStatic(LogFactory.class);
-        when(LogFactory.getLog(any(Class.class))).thenReturn(log);
+        try (MockedStatic<LogFactory> logFactoryMock = mockStatic(LogFactory.class)) {
+            logFactoryMock.when(() -> LogFactory.getLog(any(Class.class))).thenReturn(log);
 
-        GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new
-                GoogleProvisioningConnectorFactory();
+            GoogleProvisioningConnectorFactory googleProvisioningConnectorFactory = new
+                    GoogleProvisioningConnectorFactory();
 
-        Assert.assertEquals(googleProvisioningConnectorFactory.getConnectorType(), CONNECTOR_TYPE);
+            Assert.assertEquals(googleProvisioningConnectorFactory.getConnectorType(), CONNECTOR_TYPE);
+        }
     }
 }
